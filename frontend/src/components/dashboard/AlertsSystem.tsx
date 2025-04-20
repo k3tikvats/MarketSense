@@ -3,6 +3,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Settings } from "lucide-react";
+import { ActionButton } from "@/components/ui/action-button";
+import { toast } from "@/hooks/use-toast";
 
 interface Alert {
   id: string;
@@ -56,6 +58,20 @@ interface AlertsSystemProps {
 export function AlertsSystem({ className, style }: AlertsSystemProps) {
   const unreadCount = recentAlerts.filter((alert) => !alert.read).length;
   
+  const handleConfigureAlerts = () => {
+    toast({
+      title: "Alert Configuration",
+      description: "Opening alert configuration panel."
+    });
+  };
+
+  const handleMarkAsRead = (alertId: string) => {
+    toast({
+      title: "Alert Updated",
+      description: "Alert marked as read."
+    });
+  };
+  
   return (
     <div className={cn("rounded-lg border p-6", className)} style={style}>
       <div className="mb-4 flex items-center justify-between">
@@ -67,27 +83,42 @@ export function AlertsSystem({ className, style }: AlertsSystemProps) {
             </Badge>
           )}
         </div>
-        <Button variant="outline" size="sm" className="text-xs flex items-center gap-1">
+        <ActionButton 
+          variant="outline" 
+          size="sm" 
+          className="text-xs flex items-center gap-1"
+          onClick={handleConfigureAlerts}
+          navigateTo="/alerts"
+          showToast={{
+            title: "Navigating to Alert Configuration",
+            description: "Opening detailed alert settings"
+          }}
+        >
           <Settings size={14} />
           Configure Alerts
-        </Button>
+        </ActionButton>
       </div>
       <div className="space-y-2">
         {recentAlerts.map((alert) => (
-          <AlertItem key={alert.id} alert={alert} />
+          <AlertItem 
+            key={alert.id} 
+            alert={alert} 
+            onMarkAsRead={() => handleMarkAsRead(alert.id)} 
+          />
         ))}
       </div>
     </div>
   );
 }
 
-function AlertItem({ alert }: { alert: Alert }) {
+function AlertItem({ alert, onMarkAsRead }: { alert: Alert; onMarkAsRead: () => void }) {
   return (
     <div 
       className={cn(
-        "flex items-start gap-3 rounded-md p-3",
+        "flex items-start gap-3 rounded-md p-3 cursor-pointer transition-colors hover:bg-secondary/70",
         !alert.read && "bg-secondary/50",
       )}
+      onClick={onMarkAsRead}
     >
       <div 
         className={cn(
